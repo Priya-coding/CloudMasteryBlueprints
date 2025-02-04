@@ -1,0 +1,8 @@
+# macOS system files
+.DS_Store
+
+# Hugo build & cache files
+public/
+resources/
+hugo_stats.json
+hugo_cache/
