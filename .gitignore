@@ -6,3 +6,8 @@ public/
 resources/
 hugo_stats.json
 hugo_cache/
+
+# Ignore Terraform provider binaries
+.terraform/
+*.tfstate
+*.tfstate.backup
