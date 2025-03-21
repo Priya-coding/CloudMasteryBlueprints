@@ -1,9 +1,10 @@
-baseURL = "https://example.org/"
+baseURL = "http://localhost:8080/"
 languageCode = "en-us"
 title = "My Cloud Mastery Journey Site"
 theme = "docsy"
 
 [params]
+  customCSS = ["css/extra.css"]
   disableFontAwesome = false  # Set to false since Docsy requires it
   github_repo = "https://github.com/Priya-coding/CloudMasteryBlueprints"
   description = "A Documentation Site for Cloud Mastery"

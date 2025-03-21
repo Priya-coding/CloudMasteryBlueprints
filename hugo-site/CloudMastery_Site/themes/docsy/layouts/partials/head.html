@@ -24,6 +24,7 @@
 {{ template "_internal/opengraph.html" . -}}
 {{ template "_internal/schema.html" . -}}
 {{ template "_internal/twitter_cards.html" . -}}
+
 {{ partialCached "head-css.html" . "head-css-cache-key" -}}
 <script
   src="https://code.jquery.com/jquery-3.7.1.min.js"
@@ -42,6 +43,8 @@
 
 {{ template "algolia/head" . -}}
 
+<!-- Load custom CSS last -->
+<link rel="stylesheet" href="{{ "css/extra.css" | relURL }}" media="print" onload="this.media='all'">
 {{ partial "hooks/head-end.html" . -}}
 
 {{/* To comply with GDPR, cookie consent scripts places in head-end must execute before Google Analytics is enabled */ -}}
@@ -61,5 +64,6 @@
 {{ warnf `Config 'params.algolia_docsearch' is deprecated: use 'params.search.algolia'
       For details, see https://www.docsy.dev/docs/adding-content/search/#algolia-docsearch.` -}}
 {{ end -}}
+
 
 {{ end -}}

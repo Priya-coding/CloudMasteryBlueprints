@@ -10,26 +10,9 @@ resource "aws_instance" "hugo_server" {
     vpc_security_group_ids       = [var.security_group_id]
     # depends_on = [aws_security_group.hugo_sg]
 
-    # User data script to install Nginx and configure it to serve the Hugo website.
-    user_data = <<-EOF
-                #!/bin/bash
-                sudo yum update -y
-
-                # Install Nginx
-                sudo amazon-linux-extras enable nginx1
-                sudo yum install -y nginx
-                sudo systemctl start nginx
-                sudo systemctl enable nginx
-
-                # Install Hugo (Manual Binary Installation)
-                curl -LO https://github.com/gohugoio/hugo/releases/latest/download/hugo_extended_0.125.3_Linux-64bit.tar.gz
-                tar -xvzf hugo_extended_0.125.3_Linux-64bit.tar.gz
-                sudo mv hugo /usr/local/bin/
-                
-                # Verify Hugo installation
-                hugo version > /home/ec2-user/hugo_install.log
-
-                EOF
+    # Automatically deploy Hugo on EC2 launch
+    user_data = file("${path.module}/user_data.sh")
+    
     tags = {
         Name = "Hugo-Documentation-Server"
     }

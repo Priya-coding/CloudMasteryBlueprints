@@ -1,0 +1,47 @@
+{{ define "main" }}
+  <div class="container mx-auto px-6 py-12">
+    
+    <!-- Featured Post -->
+    {{ $pages := .Pages }}
+    {{ if gt (len $pages) 0 }}
+      {{ $firstPost := index $pages 0 }}
+      <div class="bg-gray-900 text-white rounded-lg overflow-hidden shadow-lg mb-8">
+        <img src="{{ $firstPost.Params.featured_image }}" class="w-full h-64 object-cover" alt="Featured Image">
+        <div class="p-6">
+          <h1 class="text-3xl font-bold">
+            <a href="{{ $firstPost.Permalink }}" class="hover:underline">{{ $firstPost.Title }}</a>
+          </h1>
+          <p class="text-sm text-gray-400">{{ $firstPost.Date.Format "Jan 2, 2006" }} • {{ $firstPost.ReadingTime }} min read</p>
+          <p class="mt-2">{{ $firstPost.Summary }}</p>
+        </div>
+      </div>
+    {{ end }}
+
+    <!-- Blog Categories -->
+    <div class="flex flex-wrap gap-2 mb-6">
+      {{ range .Site.Taxonomies.tags }}
+        <a href="{{ .Page.Permalink }}" class="px-3 py-1 bg-gray-200 text-gray-800 rounded-full text-sm hover:bg-gray-300">
+          #{{ .Page.Title }}
+        </a>
+      {{ end }}
+    </div>
+
+    <!-- Blog Grid Layout -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {{ range after 1 $pages }}
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+          <img src="{{ .Params.featured_image }}" class="w-full h-48 object-cover" alt="Blog Image">
+          <div class="p-4">
+            <h2 class="text-xl font-semibold">
+              <a href="{{ .Permalink }}" class="text-gray-900 hover:underline">{{ .Title }}</a>
+            </h2>
+            <p class="text-sm text-gray-500">{{ .Date.Format "Jan 2, 2006" }} • {{ .ReadingTime }} min read</p>
+            <p class="mt-2 text-gray-700">{{ .Summary }}</p>
+            <a href="{{ .Permalink }}" class="mt-4 inline-block text-blue-600 hover:text-blue-800">Read More →</a>
+          </div>
+        </div>
+      {{ end }}
+    </div>
+
+  </div>
+{{ end }}

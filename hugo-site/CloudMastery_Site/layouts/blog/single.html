@@ -1,0 +1,14 @@
+{{ define "main" }}
+  <div class="container mx-auto p-6 max-w-3xl">
+    <article class="bg-white shadow-lg rounded-lg p-8">
+      <h1 class="text-4xl font-bold text-gray-900 mb-4">{{ .Title }}</h1>
+      <p class="text-sm text-gray-500 mb-6">Published on {{ .Date.Format "Jan 2, 2006" }}</p>
+      <div class="prose max-w-none text-gray-800">
+        {{ .Content }}
+      </div>
+      <div class="mt-10">
+        <a href="/blog/" class="text-blue-600 hover:text-blue-800 font-medium">← Back to Blog</a>
+      </div>
+    </article>
+  </div>
+{{ end }}
