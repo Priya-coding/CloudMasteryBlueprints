@@ -1,18 +1,28 @@
 {{ define "main" }}
   <div class="container mx-auto px-6 py-12">
     
+    <!-- Blog Header -->
+    <h1 class="text-3xl font-bold mb-6">{{ .Title }}</h1>
+    
+    <!-- Blog Posts Count -->
+    {{ $pages := where .Site.RegularPages "Section" "blog" }}
+    {{ $sortedPages := sort $pages "Date" "desc" }}
+    <p class="text-sm text-gray-400 mb-4">Found {{ len $sortedPages }} blog posts</p>
+
     <!-- Featured Post -->
-    {{ $pages := .Pages }}
-    {{ if gt (len $pages) 0 }}
-      {{ $firstPost := index $pages 0 }}
+    {{ if gt (len $sortedPages) 0 }}
+      {{ $firstPost := index $sortedPages 0 }}
       <div class="bg-gray-900 text-white rounded-lg overflow-hidden shadow-lg mb-8">
-        <img src="{{ $firstPost.Params.featured_image }}" class="w-full h-64 object-cover" alt="Featured Image">
+        {{ if $firstPost.Params.featured_image }}
+          <img src="{{ $firstPost.Params.featured_image }}" class="w-full h-64 object-cover" alt="Featured Image">
+        {{ end }}
         <div class="p-6">
           <h1 class="text-3xl font-bold">
             <a href="{{ $firstPost.Permalink }}" class="hover:underline">{{ $firstPost.Title }}</a>
           </h1>
           <p class="text-sm text-gray-400">{{ $firstPost.Date.Format "Jan 2, 2006" }} • {{ $firstPost.ReadingTime }} min read</p>
           <p class="mt-2">{{ $firstPost.Summary }}</p>
+          <a href="{{ $firstPost.Permalink }}" class="mt-4 inline-block text-blue-400 hover:underline">Read More →</a>
         </div>
       </div>
     {{ end }}
@@ -28,9 +38,11 @@
 
     <!-- Blog Grid Layout -->
     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {{ range after 1 $pages }}
+      {{ range after 1 $sortedPages }}
         <div class="bg-white shadow-md rounded-lg overflow-hidden">
-          <img src="{{ .Params.featured_image }}" class="w-full h-48 object-cover" alt="Blog Image">
+          {{ if .Params.featured_image }}
+            <img src="{{ .Params.featured_image }}" class="w-full h-48 object-cover" alt="Blog Image">
+          {{ end }}
           <div class="p-4">
             <h2 class="text-xl font-semibold">
               <a href="{{ .Permalink }}" class="text-gray-900 hover:underline">{{ .Title }}</a>
@@ -40,6 +52,13 @@
             <a href="{{ .Permalink }}" class="mt-4 inline-block text-blue-600 hover:text-blue-800">Read More →</a>
           </div>
         </div>
+      {{ else }}
+        {{ if eq (len $sortedPages) 0 }}
+          <div class="col-span-3 text-center py-12">
+            <p class="text-xl text-gray-500">No blog posts found.</p>
+            <p class="mt-4">Check back soon for new content!</p>
+          </div>
+        {{ end }}
       {{ end }}
     </div>
 

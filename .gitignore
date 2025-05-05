@@ -11,3 +11,4 @@ hugo_cache/
 .terraform/
 *.tfstate
 *.tfstate.backup
+/hugo-site/CloudMastery_Site/themes/docsy/assets/vendor/Font-Awesome

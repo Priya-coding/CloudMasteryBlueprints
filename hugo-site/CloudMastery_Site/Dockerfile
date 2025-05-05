@@ -1,53 +1,49 @@
-# Use an Alpine-based Node.js image
-FROM node:22-alpine as builder
+# Stage 1: Build the Hugo site
+FROM node:18-alpine AS builder
 
 # Install dependencies
-RUN apk add --no-cache git go curl libc6-compat
+RUN apk add --no-cache git go curl tar gcompat libc6-compat libstdc++
 
-# Detect platform and install correct Hugo version
-RUN arch=$(uname -m) && \
+# Set the Hugo version
+ARG HUGO_VERSION=0.122.0
+
+# Platform-aware Hugo install (ARM64 or AMD64)
+WORKDIR /tmp
+
+# Download and install Hugo directly
+RUN set -ex && \
+    arch=$(uname -m) && \
     if [ "$arch" = "aarch64" ]; then \
-        curl -LO https://github.com/gohugoio/hugo/releases/download/v0.125.3/hugo_extended_0.125.3_Linux-arm64.tar.gz && \
-        tar -xvzf hugo_extended_0.125.3_Linux-arm64.tar.gz && \
-        cp hugo /usr/local/bin/hugo && \
-        chmod +x /usr/local/bin/hugo && \
-        rm -rf hugo_extended_0.125.3_Linux-arm64.tar.gz; \
+        curl -LO https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_Linux-ARM64.tar.gz && \
+        tar -xzf hugo_extended_${HUGO_VERSION}_Linux-ARM64.tar.gz; \
     else \
-        curl -LO https://github.com/gohugoio/hugo/releases/download/v0.125.3/hugo_extended_0.125.3_Linux-64bit.tar.gz && \
-        tar -xvzf hugo_extended_0.125.3_Linux-64bit.tar.gz && \
-        cp hugo /usr/local/bin/hugo && \
-        chmod +x /usr/local/bin/hugo && \
-        rm -rf hugo_extended_0.125.3_Linux-64bit.tar.gz; \
+        curl -LO https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_Linux-64bit.tar.gz && \
+        tar -xzf hugo_extended_${HUGO_VERSION}_Linux-64bit.tar.gz; \
     fi && \
-    ls -lah /usr/local/bin/hugo && echo "Hugo is installed correctly!" && /usr/local/bin/hugo version
+    mv hugo /usr/bin/hugo && chmod +x /usr/bin/hugo && \
+    rm -f hugo_extended_${HUGO_VERSION}_*.tar.gz LICENSE README.md
 
-# Ensure Hugo is in the system PATH
-ENV PATH="/usr/local/bin:$PATH"
+# Verify Hugo installation
+# RUN hugo version
 
-# Set working directory
+# Copy site content
 WORKDIR /src
-
-# Copy package files first
-COPY package*.json ./
-COPY themes/docsy/package*.json ./themes/docsy/
-
-# Prevent Hugo-Extended from running post-install scripts
-RUN npm install --ignore-scripts
-
-# Install Docsy theme dependencies (without post-install scripts)
-RUN cd themes/docsy && npm install --ignore-scripts
-
-# Copy the rest of the files
 COPY . .
 
-# Debug Hugo installation before running build
-RUN echo "Checking Hugo installation..." && ls -lah /usr/local/bin/hugo && hugo version
+# Build the site
+# RUN hugo --minify && ls -lah public && test -f public/index.html
+RUN hugo --minify --config hugo.toml && ls -lah public/
 
-# Build the Hugo site
-RUN hugo --minify
-
-# Serve site using Nginx
+# Stage 2: 
+  
+# Serve the site with NGINX
 FROM nginx:alpine
+
+# Copy the built site from the builder stage
 COPY --from=builder /src/public /usr/share/nginx/html
+
+# Expose port 80
 EXPOSE 80
+
+# Start NGINX
 CMD ["nginx", "-g", "daemon off;"]
