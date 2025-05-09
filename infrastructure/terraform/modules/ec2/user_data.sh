@@ -1,45 +1,27 @@
 #!/bin/bash
-set -e  # Stop script if an error occurs
+set -e  # Exit on any error
 
 # Update system
-sudo yum update -y
+yum update -y
 
-# Install Nginx
-sudo amazon-linux-extras enable nginx1
-sudo yum install -y nginx git
+# Install Docker
+amazon-linux-extras enable docker
+yum install -y docker
+systemctl start docker
+systemctl enable docker
+usermod -aG docker ec2-user
 
-# Start and enable Nginx
-sudo systemctl start nginx
-sudo systemctl enable nginx
+# Install AWS CLI (v2)
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+yum install -y unzip
+unzip awscliv2.zip
+sudo ./aws/install
 
-# Install Go (Required for Hugo)
+# Authenticate Docker with ECR
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 442042517591.dkr.ecr.us-east-1.amazonaws.com
 
-sudo yum remove -y golang
-cd /usr/local
-sudo curl -LO https://go.dev/dl/go1.23.5.linux-amd64.tar.gz
-sudo tar -C /usr/local -xzf go1.23.5.linux-amd64.tar.gz
-echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
-source ~/.bashrc
+# Pull Docker image from ECR
+docker pull 442042517591.dkr.ecr.us-east-1.amazonaws.com/cloudmastery-hugo-dev:latest
 
-# Install Hugo
-curl -LO https://github.com/gohugoio/hugo/releases/download/v0.125.3/hugo_extended_0.125.3_Linux-64bit.tar.gz
-tar -xvzf hugo_extended_0.125.3_Linux-64bit.tar.gz
-sudo mv hugo /usr/local/bin/
-
-# Clone Hugo Site from GitHub
-cd /home/ec2-user/
-rm -rf hugo-site  # Remove old repo (if exists)
-git clone https://github.com/Priya-coding/CloudMasteryBlueprints.git hugo-site
-cd hugo-site/hugo-site/CloudMastery_Site
-
-# Build Hugo Site
-hugo -D
-
-# Deploy to Nginx
-sudo rm -rf /usr/share/nginx/html/*
-sudo cp -r public/* /usr/share/nginx/html/
-sudo chown -R nginx:nginx /usr/share/nginx/html/
-sudo chmod -R 755 /usr/share/nginx/html/
-
-# Restart Nginx to apply changes
-sudo systemctl restart nginx
+# Run the container
+docker run -d -p 80:80 442042517591.dkr.ecr.us-east-1.amazonaws.com/cloudmastery-hugo-dev:latest

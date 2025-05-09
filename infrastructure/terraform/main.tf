@@ -6,6 +6,15 @@ provider "aws" {
     region = var.aws_region
 }
 
+##########################
+# IAM MODULE 
+##########################
+module "iam" {
+  source         = "./modules/iam"
+  project_name   = "cloudmastery"
+  iam_user_name  = "CloudMaster"
+}
+
 
 ##########################
 # EC2 INSTANCE MODULE 
@@ -16,6 +25,16 @@ module "ec2" {
     instance_type       = var.instance_type
     key_name            = var.key_name
     security_group_id   = module.networking.security_group_id
+    iam_instance_profile_name = module.iam.ec2_instance_profile_name
+}
+
+##########################
+# ROUTE53 MODULE 
+##########################
+module "route53" {
+  source          = "./modules/route53"
+  domain_name     = var.domain_name
+  ec2_elastic_ip  = var.ec2_elastic_ip
 }
 
 #####################################
@@ -26,6 +45,17 @@ module "networking" {
     source              = "./modules/networking"
     security_group_name = "hugo-security-group"
 }
+
+#######################################
+# ECR MODULE
+#######################################
+# This module hnadles the ECR repo for the Docekr images
+module "ecr" {
+    source         = "./modules/ecr"
+    project_name  = "cloudmastery"
+    environment   = "dev"
+}
+
 
 ############################
 # OUTPUTS
