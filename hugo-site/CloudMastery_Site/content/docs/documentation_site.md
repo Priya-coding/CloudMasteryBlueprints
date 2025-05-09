@@ -167,6 +167,29 @@ This will generate static files inside the `public/` directory.
 
 ---
 
+## Pushing Hugo Docker Image to AWS ECR
+### Step 1: Authenticate Docker to ECR
+```sh
+aws ecr get-login-password --region us-east-1 \
+  | docker login --username AWS \
+    --password-stdin <account-id>.dkr.ecr.us-east-1.amazonaws.com
+```
+
+### Step 2: Tag Your Image
+```sh
+docker tag cloudmastery-docs:latest \
+  <account-id>.dkr.ecr.us-east-1.amazonaws.com/cloudmastery-hugo-dev:latest
+```
+
+### Step 3: Push the Image
+```sh
+docker push <account-id>.dkr.ecr.us-east-1.amazonaws.com/cloudmastery-hugo-dev:latest
+```
+
+### Step 4: Verify
+Go to AWS Console → ECR → Your repository → Check the pushed image.
+
+---
 ## Conclusion
 This guide covers the complete setup and local testing of a Hugo documentation site. You can now start writing and structuring your documentation efficiently!
 
